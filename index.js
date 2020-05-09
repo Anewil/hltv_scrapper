@@ -2,10 +2,10 @@ const {Client} = require('pg');
 const puppeteer = require('puppeteer');
 
 const client = new Client({
-    user: 'postgres',
+    user: 'analysis',
     host: 'localhost',
-    database: 'postgres',
-    password: 'postgres',
+    database: 'analysis',
+    password: 'analysis',
     port: 5432,
 });
 
@@ -24,7 +24,8 @@ CREATE TABLE IF NOT EXISTS matches (
 
 
 async function scrap() {
-    const browser = await puppeteer.launch();
+    //const browser = await puppeteer.launch({ headless: false, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+    const browser = await puppeteer.launch({executablePath: '/usr/bin/chromium-browser', args: ['--no-sandbox', '--disable-setuid-sandbox']});
     const page = await browser.newPage();
     await page.goto('https://www.hltv.org/results?content=demo');
     const urls = await page.evaluate(() => {
@@ -61,10 +62,10 @@ async function scrap() {
 
 
 async function main() {
-    client.connect();
-    client.query(createQuery);
+    await client.connect();
+    await client.query(createQuery);
     await scrap();
-    client.end();
+    await client.end();
 }
 
 main();
